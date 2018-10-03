@@ -53,7 +53,7 @@ def print_entry(entry, contains, highlights):
 
     sys.stdout.buffer.write("Line {}: - {}\n".format(
         entry['line'],
-        header_line).encode('utf-8', 'ignore'))
+        textwrap.shorten(header_line, width=200, placeholder="...")).encode('utf-8', 'ignore'))
     for xml in entry['xml']:
         xml_text = xml
         for hightlight in highlights:
