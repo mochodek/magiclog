@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+
+# The main script for the magcilog tool.
+
+import argparse
+import logging
+from termcolor import colored
+import sys
+import textwrap
+import os
+import warnings
+
+from magiclog.loaders import LocalFileLogEntriesLoader, SSHFileLogEntriesLoader
+
+logger = logging.getLogger('magiclog')
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+logger.addHandler(ch)
+
+HOUR_PATTERN = "((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d)"
+
+
+def parse_input():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--logfile", help="Path to the log file.",
+                        default=False, required=True, type=str)
+
+    parser.add_argument("--contains", help="Log entries that do not contain any of the provided strings are ignored.",
+                        nargs='+', type=str, required=False, default=[])
+    parser.add_argument("--highlights", help="Strings to highlight in the text.",
+                        nargs='+', type=str, required=False, default=[])
+    parser.add_argument("--new_entry_patterns", help="If any of the provided regexps could be found in a line, "
+                                                     "the line is treated as the start of a new log entry.",
+                        nargs='+', type=str, required=False, default=[HOUR_PATTERN])
+    parser.add_argument("--lines", help="The number of last line to process.",
+                        type=int, required=False, default=1000)
+    parser.add_argument("--header_chars", help="The number of characters of the header to display.",
+                        type=int, required=False, default=50)
+
+    parser.add_argument("--server", help="The server to connect, if one want to use SSH",
+                        default="", required=False, type=str)
+    parser.add_argument("--user", help="The name of the user, if one want to use SSH",
+                        default="", required=False, type=str)
+    parser.add_argument("--password", help="The user's password, if one want to use SSH",
+                        default="", required=False, type=str)
+
+    return parser
+
+
+def print_entry(entry, contains, highlights):
+    header_line = entry['header']
+    for looked_text in contains:
+        header_line = header_line.replace(looked_text, colored(looked_text, 'red'))
+
+    sys.stdout.buffer.write("Line {}: - {}\n".format(
+        entry['line'],
+        header_line).encode('utf-8', 'ignore'))
+    for xml in entry['xml']:
+        xml_text = xml
+        for hightlight in highlights:
+            xml_text = xml_text.replace(hightlight, colored(hightlight, 'green'))
+        sys.stdout.buffer.write("{}\n".format(xml_text).encode('utf-8', 'ignore'))
+
+
+if __name__ == '__main__':   
+
+    # Parse input parameters
+    parser = parse_input()
+
+    args = vars(parser.parse_args())
+    logger.debug("Run parameters: {}".format(str(args)))
+
+    logfile = args['logfile']
+    contains = args['contains']
+    new_entry_patterns = args['new_entry_patterns']
+    highlights = args['highlights']
+    lines = args['lines']
+    header_chars = args['header_chars']
+    server = args['server']
+    user = args['user']
+    password = args['password']
+
+    if server == "":
+        # file
+        loader = LocalFileLogEntriesLoader(logfile=logfile, contains=contains,
+                                           new_entry_patterns=new_entry_patterns, lines=lines)
+    else:
+        #ssh
+        loader = SSHFileLogEntriesLoader(server=server, user=user, password=password,
+                                         logfile=logfile, contains=contains,
+
+                                         new_entry_patterns=new_entry_patterns, lines=lines)
+    try:
+        loader.load()
+    except:
+        logger.exception('Error: ',  exc_info=True)
+
+    cmd = None
+
+    while True:
+
+        try:
+            print("=== Options ===")
+            for i, entry in enumerate(loader.entries):
+                sys.stdout.buffer.write("[{}] - {}, XML={}\n".format(
+                    colored(str(i), 'green'),
+                    textwrap.shorten(entry['header'], width=header_chars, placeholder="..."),
+                    "Yes" if len(entry['xml']) > 0 else "No").encode('utf-8', 'ignore'))
+
+            print("[{}] - to reload the log file".format(colored('r', 'green')))
+            print("[{}] - to quit".format(colored('q', 'green')))
+            cmd = input("Please select an option: ")
+            print("\n")
+
+            if cmd == "q":
+                # quit
+                break
+            if cmd == "r":
+                # reload
+                loader.load()
+            if cmd.isdigit():
+                if int(cmd) < len(loader.entries):
+                    entry = loader.entries[int(cmd)]
+                    print_entry(entry, contains, highlights)
+        except:
+            logger.exception('Error: ', exc_info=True)
+
+
+    print("Thanks for using magiclog! https://github.com/mochodek/magiclog")
