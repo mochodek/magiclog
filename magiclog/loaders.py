@@ -71,6 +71,7 @@ class BaseLogEntriesLoader(object):
 
     def load(self):
         self.content = self._load_lines()
+        total_lines = len(self.content)
         if len(self.content) > self.lines:
             self.content = self.content[-self.lines:]
 
@@ -80,7 +81,7 @@ class BaseLogEntriesLoader(object):
             if self._is_entry_header(line):
                 if len(current_entry) > 0:
                     if self._is_valid(current_entry):
-                        self.entries.append(self._create_entry(current_entry, i+self.lines+1))
+                        self.entries.append(self._create_entry(current_entry, total_lines-self.lines+i))
                     current_entry = []
 
             current_entry.append(line)
@@ -93,8 +94,14 @@ class LocalFileLogEntriesLoader(BaseLogEntriesLoader):
         """
         Parameters
         ----------
-        logfile : str
+        logfile : logfile
             A path to the log file.
+        contains : list of str
+            If an entry doesn't contain any of these strings, it is ignored.
+        new_entry_patterns : list of strings.
+            If a line matches any of the regexps, it is treated as a start of a new entry.
+        lines : int
+            The number of last lines to read and parse.
         """
         super(LocalFileLogEntriesLoader, self).__init__(contains, new_entry_patterns, lines)
         self.logger = logging.getLogger('magiclog.loaders.LocalFileLogEntriesLoader')
@@ -111,24 +118,36 @@ class LocalFileLogEntriesLoader(BaseLogEntriesLoader):
 class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
     """Loads log entries from a local file"""
 
-    def __init__(self, server, user, password, logfile, contains, new_entry_patterns, lines):
+    def __init__(self, host, user, password, logfile, contains, new_entry_patterns, lines):
         """
         Parameters
         ----------
-        logfile : str
+        host : str
+            Host address.
+        user : str
+            Username to login onto when using ssh.
+        password : str
+            User password for the ssh connection.
+        logfile : logfile
             A path to the log file.
+        contains : list of str
+            If an entry doesn't contain any of these strings, it is ignored.
+        new_entry_patterns : list of strings.
+            If a line matches any of the regexps, it is treated as a start of a new entry.
+        lines : int
+            The number of last lines to read and parse.
         """
         super(SSHFileLogEntriesLoader, self).__init__(contains, new_entry_patterns, lines)
         self.logger = logging.getLogger('magiclog.loaders.LocalFileLogEntriesLoader')
         self.logfile = logfile
-        self.server = server
+        self.host = host
         self.user = user
         self.password = password
 
     def _load_lines(self):
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh_client.connect(hostname=self.server, username=self.user, password=self.password)
+        ssh_client.connect(hostname=self.host, username=self.user, password=self.password)
         stdin, stdout, stderr = ssh_client.exec_command("cat {}".format(self.logfile))
         lines = stdout.readlines()
         ssh_client.close()

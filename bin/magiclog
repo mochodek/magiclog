@@ -36,7 +36,7 @@ def parse_input():
     parser.add_argument("--header_chars", help="The number of characters of the header to display.",
                         type=int, required=False, default=50)
 
-    parser.add_argument("--server", help="The server to connect, if one want to use SSH",
+    parser.add_argument("--host", help="The host to connect, if one want to use SSH",
                         default="", required=False, type=str)
     parser.add_argument("--user", help="The name of the user, if one want to use SSH",
                         default="", required=False, type=str)
@@ -75,17 +75,17 @@ if __name__ == '__main__':
     highlights = args['highlights']
     lines = args['lines']
     header_chars = args['header_chars']
-    server = args['server']
+    host = args['host']
     user = args['user']
     password = args['password']
 
-    if server == "":
+    if host == "":
         # file
         loader = LocalFileLogEntriesLoader(logfile=logfile, contains=contains,
                                            new_entry_patterns=new_entry_patterns, lines=lines)
     else:
         #ssh
-        loader = SSHFileLogEntriesLoader(server=server, user=user, password=password,
+        loader = SSHFileLogEntriesLoader(host=host, user=user, password=password,
                                          logfile=logfile, contains=contains,
 
                                          new_entry_patterns=new_entry_patterns, lines=lines)
