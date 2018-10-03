@@ -7,15 +7,13 @@ import logging
 from termcolor import colored
 import sys
 import textwrap
-import os
-import warnings
 
 from magiclog.loaders import LocalFileLogEntriesLoader, SSHFileLogEntriesLoader
 
 logger = logging.getLogger('magiclog')
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 
 HOUR_PATTERN = "((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d)"
