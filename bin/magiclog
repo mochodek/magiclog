@@ -13,7 +13,7 @@ from magiclog.loaders import LocalFileLogEntriesLoader, SSHFileLogEntriesLoader
 logger = logging.getLogger('magiclog')
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
+ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 HOUR_PATTERN = "((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d)"
@@ -21,7 +21,7 @@ HOUR_PATTERN = "((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d)"
 
 def parse_input():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--logfile", help="Path to the log file.",
+    parser.add_argument("--logfile_path", help="Path to the log file.",
                         default=False, required=True, type=str)
 
     parser.add_argument("--contains", help="Log entries that do not contain any of the provided strings are ignored.",
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
     logger.debug("Run parameters: {}".format(str(args)))
 
-    logfile = args['logfile']
+    logfile_path = args['logfile_path']
     contains = args['contains']
     new_entry_patterns = args['new_entry_patterns']
     highlights = args['highlights']
@@ -81,12 +81,12 @@ if __name__ == '__main__':
 
     if host == "":
         # file
-        loader = LocalFileLogEntriesLoader(logfile=logfile, contains=contains,
+        loader = LocalFileLogEntriesLoader(logfile_path=logfile_path, contains=contains,
                                            new_entry_patterns=new_entry_patterns, lines=lines)
     else:
         #ssh
         loader = SSHFileLogEntriesLoader(host=host, user=user, password=password,
-                                         logfile=logfile, contains=contains,
+                                         logfile_path=logfile_path, contains=contains,
 
                                          new_entry_patterns=new_entry_patterns, lines=lines)
     try:

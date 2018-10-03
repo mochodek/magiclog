@@ -90,11 +90,11 @@ class BaseLogEntriesLoader(object):
 class LocalFileLogEntriesLoader(BaseLogEntriesLoader):
     """Loads log entries from a local file"""
 
-    def __init__(self, logfile, contains, new_entry_patterns, lines):
+    def __init__(self, logfile_path, contains, new_entry_patterns, lines):
         """
         Parameters
         ----------
-        logfile : logfile
+        logfile_path : str
             A path to the log file.
         contains : list of str
             If an entry doesn't contain any of these strings, it is ignored.
@@ -105,11 +105,11 @@ class LocalFileLogEntriesLoader(BaseLogEntriesLoader):
         """
         super(LocalFileLogEntriesLoader, self).__init__(contains, new_entry_patterns, lines)
         self.logger = logging.getLogger('magiclog.loaders.LocalFileLogEntriesLoader')
-        self.logfile = logfile
+        self.logfile_path = logfile_path
 
     def _load_lines(self):
-        self.logger.debug("Loading {}".format(self.logfile))
-        with open(self.logfile, 'r', encoding="utf-8", errors='replace') as f:
+        self.logger.debug("Loading {}".format(self.logfile_path))
+        with open(self.logfile_path, 'r', encoding="utf-8", errors='replace') as f:
             return f.readlines()
         return []
 
@@ -118,7 +118,7 @@ class LocalFileLogEntriesLoader(BaseLogEntriesLoader):
 class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
     """Loads log entries from a local file"""
 
-    def __init__(self, host, user, password, logfile, contains, new_entry_patterns, lines):
+    def __init__(self, host, user, password, logfile_path, contains, new_entry_patterns, lines):
         """
         Parameters
         ----------
@@ -128,7 +128,7 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
             Username to login onto when using ssh.
         password : str
             User password for the ssh connection.
-        logfile : logfile
+        logfile_path : str
             A path to the log file.
         contains : list of str
             If an entry doesn't contain any of these strings, it is ignored.
@@ -139,7 +139,7 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
         """
         super(SSHFileLogEntriesLoader, self).__init__(contains, new_entry_patterns, lines)
         self.logger = logging.getLogger('magiclog.loaders.LocalFileLogEntriesLoader')
-        self.logfile = logfile
+        self.logfile_path = logfile_path
         self.host = host
         self.user = user
         self.password = password
@@ -148,7 +148,7 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(hostname=self.host, username=self.user, password=self.password)
-        stdin, stdout, stderr = ssh_client.exec_command("cat {}".format(self.logfile))
+        stdin, stdout, stderr = ssh_client.exec_command("cat {}".format(self.logfile_path))
         lines = stdout.readlines()
         ssh_client.close()
         return lines
