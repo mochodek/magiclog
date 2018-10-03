@@ -50,11 +50,10 @@ class BaseLogEntriesLoader(object):
 
         return False
 
-    def _create_entry(self, entry_lines, line_no):
+    def _create_entry(self, entry_lines):
         entry = {}
 
         entry_text = "\n".join(entry_lines)
-        entry['line'] = line_no
         entry['header'] = entry_lines[0]
         hours = re.findall(HOUR_PATTERN, entry['header'])
         if len(hours) > 0:
@@ -81,7 +80,7 @@ class BaseLogEntriesLoader(object):
             if self._is_entry_header(line):
                 if len(current_entry) > 0:
                     if self._is_valid(current_entry):
-                        self.entries.append(self._create_entry(current_entry, total_lines-self.lines+i))
+                        self.entries.append(self._create_entry(current_entry))
                     current_entry = []
 
             current_entry.append(line)
@@ -148,7 +147,7 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(hostname=self.host, username=self.user, password=self.password)
-        stdin, stdout, stderr = ssh_client.exec_command("cat {}".format(self.logfile_path))
+        stdin, stdout, stderr = ssh_client.exec_command("cat {} | tail -{}".format(self.logfile_path, self.lines))
         lines = stdout.readlines()
         ssh_client.close()
         return lines

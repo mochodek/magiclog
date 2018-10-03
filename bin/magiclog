@@ -51,8 +51,7 @@ def print_entry(entry, contains, highlights):
     for looked_text in contains:
         header_line = header_line.replace(looked_text, colored(looked_text, 'red'))
 
-    sys.stdout.buffer.write("Line {}: - {}\n".format(
-        entry['line'],
+    sys.stdout.buffer.write("{}\n".format(
         textwrap.shorten(header_line, width=200, placeholder="...")).encode('utf-8', 'ignore'))
     for xml in entry['xml']:
         xml_text = xml
