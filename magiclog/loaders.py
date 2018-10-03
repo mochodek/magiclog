@@ -148,7 +148,7 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(hostname=self.host, username=self.user, password=self.password, compress=True)
         self.logger.info("Connecting to {}@{}...".format(self.user, self.host))
-        stdin, stdout, stderr = ssh_client.exec_command("cat {} | tail -{}".format(self.logfile_path, self.lines))
+        stdin, stdout, stderr = ssh_client.exec_command("cat {} | tail -n {}".format(self.logfile_path, self.lines))
         self.logger.info("Reading lines...")
         lines = stdout.readlines()
         ssh_client.close()

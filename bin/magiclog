@@ -49,7 +49,8 @@ def parse_input():
 def print_entry(entry, contains, highlights):
     header_line = entry['header']
     for looked_text in contains:
-        header_line = header_line.replace(looked_text, colored(looked_text, 'red'))
+        if looked_text != "":
+            header_line = header_line.replace(looked_text, colored(looked_text, 'red'))
 
     sys.stdout.buffer.write("{}\n".format(
         textwrap.shorten(header_line, width=200, placeholder="...")).encode('utf-8', 'ignore'))
