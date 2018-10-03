@@ -137,7 +137,7 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
             The number of last lines to read and parse.
         """
         super(SSHFileLogEntriesLoader, self).__init__(contains, new_entry_patterns, lines)
-        self.logger = logging.getLogger('magiclog.loaders.LocalFileLogEntriesLoader')
+        self.logger = logging.getLogger('magiclog.loaders.SSHFileLogEntriesLoader')
         self.logfile_path = logfile_path
         self.host = host
         self.user = user
@@ -147,8 +147,9 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(hostname=self.host, username=self.user, password=self.password, compress=True)
-
+        self.logger.info("Connecting to {}@{}...".format(self.user, self.host))
         stdin, stdout, stderr = ssh_client.exec_command("cat {} | tail -{}".format(self.logfile_path, self.lines))
+        self.logger.info("Reading lines...")
         lines = stdout.readlines()
         ssh_client.close()
         return lines
