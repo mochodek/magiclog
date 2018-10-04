@@ -54,13 +54,14 @@ class BaseLogEntriesLoader(object):
         entry = {}
 
         entry_text = "\n".join(entry_lines)
+        entry['lines'] = entry_lines
         entry['header'] = entry_lines[0]
         hours = re.findall(HOUR_PATTERN, entry['header'])
         if len(hours) > 0:
             entry['hour'] = hours[0]
         else:
             entry['hour'] = None
-        xml_dirty = re.findall("<[?]xml.*>", entry_text, re.MULTILINE | re.IGNORECASE | re.DOTALL)
+        xml_dirty = re.findall("<.*>", entry_text, re.MULTILINE | re.IGNORECASE | re.DOTALL)
         entry['xml'] = []
         for xml_text in xml_dirty:
             entry['xml'].append(re.sub(r'(\n)\1{1,}', r'\1', minidom.parseString(xml_text).toprettyxml()))
