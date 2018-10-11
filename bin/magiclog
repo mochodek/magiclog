@@ -119,6 +119,7 @@ if __name__ == '__main__':
             print("[{}] - to reload the log file".format(colored('r', 'green')))
             print("[{}] - to redefine contains".format(colored('c', 'green')))
             print("[{}] - to redefine highlights".format(colored('h', 'green')))
+            print("[{}] - to redefine lines".format(colored('l', 'green')))
             print("[{}] - to quit".format(colored('q', 'green')))
             cmd = input("Please select an option: ")
             print("\n")
@@ -131,13 +132,17 @@ if __name__ == '__main__':
                 loader.load()
             if cmd == "c":
                 # redefine contains and reload
-                text = input("Please provide new list of strings (use \" for multi-word strings): ")
+                text = input("Please provide a list of strings (use \" for multi-word strings): ")
                 loader.contains = shlex.split(text)
                 loader.load()
             if cmd == "h":
-                # redefine highlights and reload
-                text = input("Please provide new list of strings (use \" for multi-word strings: ")
-                loader.highlights = shlex.split(text)
+                # redefine highlights
+                text = input("Please provide a list of strings (use \" for multi-word strings): ")
+                highlights = shlex.split(text)
+            if cmd == "l":
+                # redefine lines
+                text = input("Please provide a number: ")
+                loader.lines = int(text)
                 loader.load()
             if cmd.isdigit():
                 if int(cmd) < len(loader.entries):
