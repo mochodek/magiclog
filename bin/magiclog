@@ -7,6 +7,7 @@ import logging
 from termcolor import colored
 import sys
 import textwrap
+import shlex
 
 from magiclog.loaders import LocalFileLogEntriesLoader, SSHFileLogEntriesLoader
 
@@ -17,6 +18,13 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 HOUR_PATTERN = "((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d)"
+
+colors = {0: 'green', 2: 'blue', 3: 'magenta', 4: 'cyan', 5: 'yellow' }
+
+def get_color(number):
+    if number > 4:
+        return 'green'
+    else colors[number]
 
 
 def parse_input():
@@ -58,8 +66,8 @@ def print_entry(entry, contains, highlights):
 
     for xml in entry['xml']:
         xml_text = xml
-        for hightlight in highlights:
-            xml_text = xml_text.replace(hightlight, colored(hightlight, 'green'))
+        for i, hightlight in enumerate(highlights):
+            xml_text = xml_text.replace(hightlight, colored(hightlight, get_color(i)))
         sys.stdout.buffer.write("{}\n".format(xml_text).encode('utf-8', 'ignore'))
 
 
@@ -109,6 +117,8 @@ if __name__ == '__main__':
                     "Yes" if len(entry['xml']) > 0 else "No").encode('utf-8', 'ignore'))
 
             print("[{}] - to reload the log file".format(colored('r', 'green')))
+            print("[{}] - to redefine contains".format(colored('c', 'green')))
+            print("[{}] - to redefine highlights".format(colored('h', 'green')))
             print("[{}] - to quit".format(colored('q', 'green')))
             cmd = input("Please select an option: ")
             print("\n")
@@ -118,6 +128,16 @@ if __name__ == '__main__':
                 break
             if cmd == "r":
                 # reload
+                loader.load()
+            if cmd == "c":
+                # redefine contains and reload
+                text = input("Please provide new list of strings (use \" for multi-word strings): ")
+                loader.contains = shlex.split(text)
+                loader.load()
+            if cmd == "h":
+                # redefine highlights and reload
+                text = input("Please provide new list of strings (use \" for multi-word strings: ")
+                loader.highlights = shlex.split(text)
                 loader.load()
             if cmd.isdigit():
                 if int(cmd) < len(loader.entries):
