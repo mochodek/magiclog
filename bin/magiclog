@@ -19,12 +19,13 @@ logger.addHandler(ch)
 
 HOUR_PATTERN = "((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d)"
 
-colors = {0: 'green', 2: 'blue', 3: 'magenta', 4: 'cyan', 5: 'yellow' }
+colors = {0: 'green', 1: 'blue', 2: 'magenta', 3: 'cyan', 4: 'yellow' }
 
 def get_color(number):
     if number > 4:
         return 'green'
-    else colors[number]
+    else:
+       return colors[number]
 
 
 def parse_input():
