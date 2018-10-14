@@ -32,7 +32,6 @@ def parse_input():
     parser = argparse.ArgumentParser()
     parser.add_argument("--logfile_path", help="Path to the log file.",
                         default=False, required=True, type=str)
-
     parser.add_argument("--contains", help="Log entries that do not contain any of the provided strings are ignored.",
                         nargs='+', type=str, required=False, default=[])
     parser.add_argument("--highlights", help="Strings to highlight in the text.",
@@ -69,6 +68,9 @@ def print_entry(entry, contains, highlights):
         xml_text = xml
         for i, hightlight in enumerate(highlights):
             xml_text = xml_text.replace(hightlight, colored(hightlight, get_color(i)))
+        for looked_text in contains:
+            if looked_text != "":
+                xml_text = xml_text.replace(looked_text, colored(looked_text, 'red'))
         sys.stdout.buffer.write("{}\n".format(xml_text).encode('utf-8', 'ignore'))
 
 
@@ -133,22 +135,25 @@ if __name__ == '__main__':
                 loader.load()
             if cmd == "c":
                 # redefine contains and reload
+                logger.debug(loader.contains)
                 text = input("Please provide a list of strings (use \" for multi-word strings): ")
                 loader.contains = shlex.split(text)
                 loader.load()
             if cmd == "h":
                 # redefine highlights
+                logger.debug(highlights)
                 text = input("Please provide a list of strings (use \" for multi-word strings): ")
                 highlights = shlex.split(text)
             if cmd == "l":
                 # redefine lines
+                logger.debug(loader.lines)
                 text = input("Please provide a number: ")
                 loader.lines = int(text)
                 loader.load()
             if cmd.isdigit():
                 if int(cmd) < len(loader.entries):
                     entry = loader.entries[int(cmd)]
-                    print_entry(entry, contains, highlights)
+                    print_entry(entry, loader.contains, highlights)
         except:
             logger.exception('Error: ', exc_info=True)
 

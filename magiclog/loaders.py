@@ -116,6 +116,12 @@ class LocalFileLogEntriesLoader(BaseLogEntriesLoader):
             return f.readlines()
         return []
 
+    def set_contains(self, contains):
+        LocalFileLogEntriesLoader.contains = contains
+
+    def set_lines(self, lines):
+        LocalFileLogEntriesLoader.lines = lines
+
 
 
 class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
@@ -157,3 +163,9 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
         lines = stdout.readlines()
         ssh_client.close()
         return lines
+
+    def set_contains(self, contains):
+        LocalFileLogEntriesLoader.contains = contains
+
+    def set_lines(self, lines):
+        LocalFileLogEntriesLoader.lines = lines
