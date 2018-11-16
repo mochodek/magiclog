@@ -137,7 +137,7 @@ if __name__ == '__main__':
                 # redefine contains and reload
                 logger.debug(loader.contains)
                 text = input("Please provide a list of strings (use \" for multi-word strings): ")
-                loader.contains = shlex.split(text)
+                loader.set_contains(shlex.split(text))
                 loader.load()
             if cmd == "h":
                 # redefine highlights
@@ -148,7 +148,7 @@ if __name__ == '__main__':
                 # redefine lines
                 logger.debug(loader.lines)
                 text = input("Please provide a number: ")
-                loader.lines = int(text)
+                loader.set_lines(int(text))
                 loader.load()
             if cmd.isdigit():
                 if int(cmd) < len(loader.entries):
