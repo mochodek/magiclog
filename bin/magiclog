@@ -57,6 +57,9 @@ def parse_input():
 def print_entry(entry, contains, highlights):
     for line in entry['lines']:
         if "<" not in line and ">" not in line:
+            for i, hightlight in enumerate(highlights):
+                if highlights not in contains:
+                    line = line.replace(hightlight, colored(hightlight, get_color(i)))
             for looked_text in contains:
                 if looked_text != "":
                     line = line.replace(looked_text, colored(looked_text, 'red'))

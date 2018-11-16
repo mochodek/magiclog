@@ -118,9 +118,11 @@ class LocalFileLogEntriesLoader(BaseLogEntriesLoader):
 
     def set_contains(self, contains):
         LocalFileLogEntriesLoader.contains = contains
+        self.contains = contains
 
     def set_lines(self, lines):
         LocalFileLogEntriesLoader.lines = lines
+        self.lines = lines
 
 
 
@@ -166,6 +168,8 @@ class SSHFileLogEntriesLoader(BaseLogEntriesLoader):
 
     def set_contains(self, contains):
         LocalFileLogEntriesLoader.contains = contains
+        self.contains = contains
 
     def set_lines(self, lines):
         LocalFileLogEntriesLoader.lines = lines
+        self.lines
